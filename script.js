@@ -146,4 +146,41 @@ input.addEventListener('keydown', e => {
     addLine(`comando não encontrado: ${cmd}`, 'error');
   }
 });
+
+const ws = new WebSocket(
+  `wss://${SUPABASE_URL.replace('https://', '')}/realtime/v1/websocket?apikey=${SUPABASE_KEY}&vsn=1.0.0`
+);
+
+ws.onopen = () => {
+  ws.send(JSON.stringify({
+    topic: 'realtime:public:posts',
+    event: 'phx_join',
+    payload: {},
+    ref: '1'
+  }));
+};
+
+ws.onmessage = (e) => {
+  const msg = JSON.parse(e.data);
+  if (msg.event === 'INSERT') {
+    const p = msg.payload.record;
+    const postEl = document.createElement('div');
+    postEl.className = 'post';
+    postEl.innerHTML = `
+      <span class="post-date">${p.data}</span>
+      <h2 class="post-title">${p.titulo}</h2>
+      <p class="post-body">${p.corpo}</p>
+    `;
+    document.querySelector('.posts').prepend(postEl);
+  }
+  if (msg.event === 'DELETE') {
+    const titulo = msg.payload.old_record.titulo;
+    document.querySelectorAll('.post').forEach(post => {
+      if (post.querySelector('.post-title').textContent.trim() === titulo) {
+        post.remove();
+      }
+    });
+  }
+};
+
 document.querySelector('.terminal').addEventListener('click', () => input.focus());
