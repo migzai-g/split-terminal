@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inconsolata:wdth,wght@75,200..900&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #0d0d0d;
+  color: #e2e8f0;
+  font-family: "Inconsolata", monospace;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1rem;
+}
+
+.logo {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+}
+
+.logo span {
+  font-family: "Inconsolata", monospace;
+  color: #94a3b8;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+  font-size: 20px;
+}
+
+nav a {
+  color: #94a3b8;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: white;
+}
+
+main {
+  padding: 0.5rem 1rem 1rem 1rem;
+  height: calc(100vh - 60px);
+  display: flex;
+  gap: 1.5rem;
+}
+
+.terminal-box {
+  flex: 2;
+  min-width: 0;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.posts-box {
+  flex: 1;
+  min-width: 200px;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.box-header {
+  color: #4ade80;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #2a2a2a;
+  user-select: none;
+}
+
+.terminal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.terminal-output {
+  flex: 1;
+  margin-bottom: 12px;
+}
+
+.line {
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.line.system { color: #4ade80; }
+.line.result { color: #94a3b8; }
+.line.cmd    { color: #e2e8f0; }
+.line.error  { color: #f87171; }
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #2a2a2a;
+  padding: 8px 12px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.prompt {
+  color: #4ade80;
+  user-select: none;
+  white-space: nowrap;
+}
+
+#cmd {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e2e8f0;
+  font-family: "Inconsolata", monospace;
+  font-size: 14px;
+  caret-color: #4ade80;
+  width: 300px;
+}
+
+.cmd-name {
+  color: #4ade80;
+}
+
+.posts {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.post {
+  border-left: 2px solid #2a2a2a;
+  padding-left: 12px;
+}
+
+.post-date {
+  font-size: 11px;
+  color: #4ade80;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.post-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #e2e8f0;
+  margin-bottom: 6px;
+}
+
+.post-body {
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.7;
+  word-break: break-word; /* quebra palavras longas */
+  white-space: pre-wrap;  /* respeita quebras de linha */
+}
+
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+    height: auto;
+    padding: 0.5rem 1rem 1rem 1rem;
+  }
+
+  .terminal-box,
+  .posts-box {
+    width: 100%;
+    min-width: unset;
+    flex: unset;
+  }
+
+  .terminal-box {
+    min-height: 400px;
+  }
+
+  header {
+    padding: 1rem;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #cmd {
+    width: 100%;
+  }
+}
