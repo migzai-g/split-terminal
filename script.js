@@ -1,13 +1,18 @@
 const SUPABASE_URL = 'https://xcgbwokqnuvwcgvfjjbf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjZ2J3b2txbnV2d2NndmZqamJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNTMyNTUsImV4cCI6MjA5NDYyOTI1NX0.NWwSa21rLZBEq9T8p-0I50e-6ddQMZbjlE-0hWbVSic';
 
+let usuarioLogado = false;
+
 const output = document.getElementById('output');
 const input = document.getElementById('cmd');
+
 const commands = {
   help: () => [
     {t:'system', v:'comandos disponíveis:'},
     {t:'cmd-line', cmd:'post [título] [texto...]', desc:'cria um novo post'},
     {t:'cmd-line', cmd:'deletepost [título]', desc:'apaga um post'},
+    {t:'cmd-line', cmd:'login [email] [senha]', desc:'autenticar'},
+    {t:'cmd-line', cmd:'logout', desc:'encerrar sessão'},
     {t:'cmd-line', cmd:'clear', desc:'limpa o terminal'},
     {t:'cmd-line', cmd:'whoami', desc:'usuário atual'},
     {t:'cmd-line', cmd:'echo [texto]', desc:'repete o texto'},
@@ -16,7 +21,7 @@ const commands = {
     {t:'cmd-line', cmd:'connect', desc:'tenta conexão'},
   ],
   whoami: () => [
-    {t:'result', v:'guest — acesso não autorizado'}
+    {t:'result', v: usuarioLogado ? 'admin — autenticado' : 'guest — acesso não autorizado'}
   ],
   ls: () => [
     {t:'result', v:'drwxr-x  docs/'},
@@ -33,7 +38,35 @@ const commands = {
     {t:'error', v:'erro: credenciais insuficientes'},
     {t:'result', v:'use: connect [host] [porta]'},
   ],
+  login: async (args) => {
+    const [email, senha] = args;
+    if (!email || !senha) {
+      return [{t:'error', v:'uso: login [email] [senha]'}];
+    }
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+      },
+      body: JSON.stringify({ email, password: senha }),
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      usuarioLogado = true;
+      return [{t:'system', v:'login realizado.'}];
+    } else {
+      return [{t:'error', v:'credenciais inválidas.'}];
+    }
+  },
+  logout: () => {
+    usuarioLogado = false;
+    return [{t:'system', v:'sessão encerrada.'}];
+  },
   deletepost: (args) => {
+    if (!usuarioLogado) {
+      return [{t:'error', v:'acesso negado. use: login [email] [senha]'}];
+    }
     const titulo = args.join(' ').trim();
     if (!titulo) {
       return [{t:'error', v:'uso correto: deletepost [título]'}];
@@ -119,34 +152,6 @@ async function carregarPosts() {
 }
 carregarPosts();
 
-function addLine(text, type = 'result', cmd = null, desc = null) {
-  const div = document.createElement('div');
-  div.className = `line ${type}`;
-  if (type === 'cmd-line') {
-    div.innerHTML = `<span class="cmd-name">${cmd}</span> — ${desc}`;
-  } else {
-    div.textContent = text;
-  }
-  output.appendChild(div);
-}
-addLine('s.p.l.i.t — sistema iniciado.', 'system');
-addLine('digite help para ver os comandos.', 'result');
-input.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  const raw = input.value.trim();
-  if (!raw) return;
-  addLine(`guest@split:~$ ${raw}`, 'cmd');
-  input.value = '';
-  const [cmd, ...args] = raw.split(' ');
-  if (cmd === 'clear') { output.innerHTML = ''; return; }
-  if (cmd === 'echo') { addLine(args.join(' '), 'result'); return; }
-  if (commands[cmd]) {
-    commands[cmd](args).forEach(r => addLine(r.v, r.t, r.cmd, r.desc));
-  } else {
-    addLine(`comando não encontrado: ${cmd}`, 'error');
-  }
-});
-
 const ws = new WebSocket(
   `wss://${SUPABASE_URL.replace('https://', '')}/realtime/v1/websocket?apikey=${SUPABASE_KEY}&vsn=1.0.0`
 );
@@ -182,5 +187,37 @@ ws.onmessage = (e) => {
     });
   }
 };
+
+function addLine(text, type = 'result', cmd = null, desc = null) {
+  const div = document.createElement('div');
+  div.className = `line ${type}`;
+  if (type === 'cmd-line') {
+    div.innerHTML = `<span class="cmd-name">${cmd}</span> — ${desc}`;
+  } else {
+    div.textContent = text;
+  }
+  output.appendChild(div);
+}
+
+addLine('s.p.l.i.t — sistema iniciado.', 'system');
+addLine('digite help para ver os comandos.', 'result');
+
+input.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const raw = input.value.trim();
+  if (!raw) return;
+  addLine(`guest@split:~$ ${raw}`, 'cmd');
+  input.value = '';
+  const [cmd, ...args] = raw.split(' ');
+  if (cmd === 'clear') { output.innerHTML = ''; return; }
+  if (cmd === 'echo') { addLine(args.join(' '), 'result'); return; }
+  if (commands[cmd]) {
+    Promise.resolve(commands[cmd](args)).then(result => {
+      result.forEach(r => addLine(r.v, r.t, r.cmd, r.desc));
+    });
+  } else {
+    addLine(`comando não encontrado: ${cmd}`, 'error');
+  }
+});
 
 document.querySelector('.terminal').addEventListener('click', () => input.focus());
