@@ -1,4 +1,4 @@
-const SUPABASE_URL = 'https://xcgbwokqnuvwcgvfjjbf.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://xcgbwokqnuvwcgvfjjbf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjZ2J3b2txbnV2d2NndmZqamJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNTMyNTUsImV4cCI6MjA5NDYyOTI1NX0.NWwSa21rLZBEq9T8p-0I50e-6ddQMZbjlE-0hWbVSic';
 
 const output = document.getElementById('output');
